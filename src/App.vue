@@ -21,25 +21,28 @@
             </div>
             <hr>
             <div class="row">
-              <div class="col-6">
-                <h4>Price Sort</h4>
-                <div class="btn-group btn-group-lg" role="group" aria-label="priceSort">
+              <div class="col">
+                <h4><span class="badge badge-secondary badge-pill">Price Sort</span></h4>
+                <div class="btn-group btn-group-lg btn-block" role="group" aria-label="priceSort">
                   <button @click="priceSort" type="button" class="btn btn-outline-secondary">Dec</button>
                   <button @click="priceSortReverse" type="button" class="btn btn-outline-secondary">Inc</button>
                 </div>
               </div>
-              <div class="col-6 text-right">
-                <h4>Title Sort</h4>
-                <div class="btn-group btn-group-lg" role="group" aria-label="titleSort">
+            </div>
+            <hr>
+            <div class="row">
+              <div class="col">
+                <h4><span class="badge badge-secondary badge-pill">Title Sort</span></h4>
+                <div class="btn-group btn-group-lg btn-block" role="group" aria-label="titleSort">
                   <button @click="titleSort" type="button" class="btn btn-outline-secondary">A-Z</button>
                   <button @click="titleSortReverse" type="button" class="btn btn-outline-secondary">Z-A</button>
                 </div>
               </div>
             </div>
-            <br>
+            <hr>
             <div class="row">
               <div class="col">
-                <button class="btn btn-outline-warning btn-block">Clear filter</button>
+                <button @click="clearSort" class="btn btn-outline-warning btn-block">Clear filter</button>
               </div>
             </div>
           </div>
@@ -47,11 +50,12 @@
             <h4><span class="badge badge-secondary badge-pill">Items</span></h4>
             <!-- items block -->
             <ul class="list-group">
-              <li class="list-group-item list-group-item-action text-left" v-for="item of filtered"><span class="">{{ item.name }}</span><button v-on:click="addTo(item.id, item.name, item.price)" class="btn btn-outline-warning float-right">Add to cart {{ item.price }}</button></li>
+              <li class="list-group-item list-group-item-action text-left" v-for="item of filteredItems"><span class="">{{ item.name }}</span><button v-on:click="addTo(item.id, item.name, item.price)" class="btn btn-outline-warning float-right">Add to cart {{ item.price }}</button></li>
             </ul>
           </div>
         </div>
         <div class="row">
+          <!-- stats block -->
           <div class="col">
             <h4><span class="badge badge-secondary badge-pill">Stats</span></h4>
             <div class="row">
@@ -62,9 +66,6 @@
                 <p>Total count of items in the shop: {{ stats.totalOrders }}</p>
               </div>
             </div>
-            <!-- stats block -->
-            
-            
           </div>
         </div>
       </div>
@@ -133,7 +134,8 @@ export default {
       sum: 0,
       currentPrice: 0,
       search: '',
-      filtered: []
+      filtered: [],
+      temp: []
     };
   },
   mounted() {
@@ -222,10 +224,11 @@ export default {
     },
     priceSort() {
       const comparePrice = (a, b) => (a.price - b.price);
-      return this.filtered = this.filteredItems.sort(comparePrice);
+      this.temp = this.items
+      return this.filtered = this.temp.sort(comparePrice);
     },
     priceSortReverse() {
-      return this.filtered = this.priceSort.reverse()
+      return this.filtered = this.priceSort().reverse()
     },
     titleSort() {
       const compareTitle = (a, b) => {
@@ -237,14 +240,15 @@ export default {
         return 0
       }
 
-      return this.filtered = this.filteredItems.sort(compareTitle);
+      this.temp = this.items;
+      return this.filtered = this.items.sort(compareTitle);
     },
     titleSortReverse() {
-      const f = this.titleSort.reverse();
-      return this.filtered = f;
+      return this.filtered = this.titleSort().reverse();
     },
-    cleraFilter() {
-      
+    clearSort() {
+      this.search = '';
+      this.filtered = this.items;
     }
   },
   computed: {
