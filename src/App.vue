@@ -42,12 +42,22 @@
             <hr>
             <div class="row">
               <div class="col">
-                <button @click="clearSort" class="btn btn-outline-warning btn-block">Clear filter</button>
+                <button @click="clearSort" class="btn btn-outline-warning btn-block">Clear search</button>
               </div>
             </div>
           </div>
           <div class="col ml-5 shadow p-3 mb-5 bg-white rounded">
-            <h4><span class="badge badge-secondary badge-pill">Items</span></h4>
+            <h4><span class="badge badge-secondary badge-pill">
+              Items
+              <div v-if="loading" class="spinner-grow spinner-grow-sm" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </span></h4>
+            <div v-if="loading" class="d-flex justify-content-center">
+              <div class="spinner-border m-5"  style="width: 3rem; height: 3rem;" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </div>
             <!-- items block -->
             <ul class="list-group">
               <li class="list-group-item list-group-item-action text-left" v-for="item of filteredItems"><span class="">{{ item.name }}</span><button v-on:click="addTo(item.id, item.name, item.price)" class="btn btn-outline-warning float-right">Add to cart {{ item.price }}</button></li>
@@ -57,13 +67,18 @@
         <div class="row">
           <!-- stats block -->
           <div class="col">
-            <h4><span class="badge badge-secondary badge-pill">Stats</span></h4>
+            <h4><span class="badge badge-secondary badge-pill">
+              Stats
+              <div v-if="loadingS" class="spinner-grow spinner-grow-sm" role="status">
+                <span class="sr-only">Loading...</span>
+              </div>
+            </span></h4>
             <div class="row">
               <div class="col">
                 <p>Total count of orders in the shop: {{ stats.totalItems }}</p>
               </div>
               <div class="col">
-                <p>Total count of items in the shop: {{ stats.totalOrders }}</p>
+                <p>Total count of items in the shop: {{ items.length }}</p>
               </div>
             </div>
           </div>
@@ -100,7 +115,7 @@
                 </button>
               </th>
               <th>{{ item.price }}</th>
-              <th><button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button></th>
+              <th><button @click="deleteItem(item.id)" type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button></th>
             </tr>
           </tbody>
         </table>
@@ -116,7 +131,14 @@
             <h3 class="text-right">Total: {{ sum }}</h3><hr>
           </div>
         </div>
-        <button class="btn btn-success btn-lg float-right btn-block">Buy selected items</button>
+        <div>
+          <button v-if="loadingC" class="btn btn-success btn-lg float-right btn-block" type="button" disabled>
+            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+            PLease wait...
+          </button>
+          <button v-else class="btn btn-success btn-lg float-right btn-block">Buy selected items</button>
+        </div>
+        </div>
       </div>
     </div>
   </div>
@@ -134,8 +156,12 @@ export default {
       sum: 0,
       currentPrice: 0,
       search: '',
-      filtered: [],
-      temp: []
+      temp: [],
+      page: 0,
+      size: 5,
+      loading: true,
+      loadingS: true,
+      loadingC: false
     };
   },
   mounted() {
@@ -149,13 +175,20 @@ export default {
     fetchItems() {
       fetch("https://5c2e28432fffe80014bd68f5.mockapi.io/items")
       .then(res => res.json())
-      .then(items => this.items = items)
+      .then(items => {
+        this.items = items;
+        this.temp = this.items;
+        this.loading = false;
+      })
       .catch(e => alert("Trouble with network! Check ur internet connection"));
     },
     fetchStats() {
       fetch(`https://5c2f60112fffe80014bd6a37.mockapi.io/total/${this.id}`)
       .then(res => res.json())
-      .then(data => this.stats = data)
+      .then(data => {
+        this.stats = data;
+        this.loadingS = false;
+      })
       .catch(e => alert("Trouble with network! Check ur internet connection"));
     },
     addTo: function(id, name, price) {
@@ -184,17 +217,17 @@ export default {
       }
     },
     updateSum() {
-      let sum = 0
-      const array = this.basket.map(item => item.price)
+      let sum = 0;
+      const array = this.basket.map(item => item.price);
 
       for(let item of array){
-        sum += +item
+        sum += +item;
       }
-      return this.sum = sum
+      return this.sum = sum;
     },
     cleanList() {
       this.basket = [],
-      this.sum = 0
+      this.sum = 0;
     },
     countInc(id) {
       this.basket.filter(item => {
@@ -224,39 +257,75 @@ export default {
     },
     priceSort() {
       const comparePrice = (a, b) => (a.price - b.price);
-      this.temp = this.items
-      return this.filtered = this.temp.sort(comparePrice);
+
+      return this.temp.sort(comparePrice);
     },
     priceSortReverse() {
-      return this.filtered = this.priceSort().reverse()
+      return this.priceSort().reverse();
     },
     titleSort() {
       const compareTitle = (a, b) => {
         let titleA = a.name.toLowerCase();
         let titleB = b.name.toLowerCase();
 
-        if(titleA < titleB) return -1
-        if(titleA > titleA) return 1
-        return 0
+        if(titleA < titleB) return -1;
+        if(titleA > titleA) return 1;
+        return 0;
       }
 
-      this.temp = this.items;
-      return this.filtered = this.items.sort(compareTitle);
+      return this.temp.sort(compareTitle);
     },
     titleSortReverse() {
-      return this.filtered = this.titleSort().reverse();
+      return this.titleSort().reverse();
     },
     clearSort() {
       this.search = '';
-      this.filtered = this.items;
-    }
+      this.temp = this.items;
+    },
+    nextPage() {
+      this.page++;
+    },
+    prevPage() {
+      this.page--;
+    },
+    deleteItem(itemId) {
+      /*const index = this.basket.findIndex(item => item.id === itemId);
+      this.basket.splice(index, 1);*/
+      this.basket = this.basket.filter(item => item.id !== itemId);
+    },
+    /*buy() {
+      this.loadingC = true;
+      fetch("example/com", {
+        headers: {
+          "Accept": 'application/json',
+          'Content-Type': 'application/json'
+        },
+        method: "POST",
+        body: JSON.stringify(this.basket)
+      })
+      .then(() => this.loadingC = false)
+      .catch(e => alert("Error! Try again"))
+    }*/
   },
   computed: {
     filteredItems() {
-      return this.items.filter(item => {
-        return this.filtered = item.name.indexOf(this.search) > -1
+      return this.temp.filter(item => {
+        return item.name.indexOf(this.search) > -1
       })
     }
+    /*pageCount() {
+      let l = this.items.length;
+      let s = this.size;
+
+      return Math.ceil(l/s)
+    },
+    paginatedData() {
+      let start = this.page * this.size;
+      let end = start + this.size;
+      //this.temp = this.items;
+
+      return this.temp.slice(start, end)
+    }*/
   }
 };
 </script>
