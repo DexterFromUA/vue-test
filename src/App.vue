@@ -78,7 +78,7 @@
                 <p>Total count of orders in the shop: {{ stats.totalItems }}</p>
               </div>
               <div class="col">
-                <p>Total count of items in the shop: {{ items.length }}</p>
+                <p>Total count of items in the shop: {{ temp.length }}</p>
               </div>
             </div>
           </div>
@@ -87,6 +87,8 @@
       <div class="col ml-5 shadow p-3 mb-5 bg-white rounded" style="height: 385px">
         <!-- basket block -->
         <h4><span class="badge badge-secondary badge-pill">Cart</span></h4>
+        <div v-if="!basket.length"><h2><p class="text-center mt-5">Haven't items yet</p></h2></div>
+        <div v-else>
         <table class="table">
           <thead>
             <tr>
@@ -136,61 +138,36 @@
             <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
             PLease wait...
           </button>
-          <button v-else class="btn btn-success btn-lg float-right btn-block">Buy selected items</button>
+          <button v-else class="btn btn-success btn-lg float-right btn-block">Checkout</button>
+        </div>
         </div>
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 export default {
   name: "app",
   data() {
     return {
-      items: [],
-      id: 1,
-      stats: [],
       basket: [],
       sum: 0,
       currentPrice: 0,
       search: '',
-      temp: [],
-      page: 0,
-      size: 5,
-      loading: true,
-      loadingS: true,
       loadingC: false
     };
   },
   mounted() {
-    this.fetchItems();
-    this.fetchStats();
+    this.$store.dispatch('getItems');
+    this.$store.dispatch('getStats')
   },
   updated() {
     this.updateSum();
   },
   methods: {
-    fetchItems() {
-      fetch("https://5c2e28432fffe80014bd68f5.mockapi.io/items")
-      .then(res => res.json())
-      .then(items => {
-        this.items = items;
-        this.temp = this.items;
-        this.loading = false;
-      })
-      .catch(e => alert("Trouble with network! Check ur internet connection"));
-    },
-    fetchStats() {
-      fetch(`https://5c2f60112fffe80014bd6a37.mockapi.io/total/${this.id}`)
-      .then(res => res.json())
-      .then(data => {
-        this.stats = data;
-        this.loadingS = false;
-      })
-      .catch(e => alert("Trouble with network! Check ur internet connection"));
-    },
     addTo: function(id, name, price) {
       const newItem = {
         id: id,
@@ -204,7 +181,7 @@ export default {
         this.basket.filter(item => {
           if(item.id === newItem.id) {
             item.count += 1;
-            this.items.filter(cur => {
+            this.setItems.filter(cur => {
               if(cur.id === item.id){
                 this.currentPrice = cur.price;
               }
@@ -233,7 +210,7 @@ export default {
       this.basket.filter(item => {
         if(item.id === id) {
           item.count += 1;
-          this.items.filter(cur => {
+          this.setItems.filter(cur => {
             if(cur.id === item.id){
               this.currentPrice = cur.price;
             }
@@ -246,7 +223,7 @@ export default {
       this.basket.filter(item => {
         if(item.id === id) {
           item.count -= 1;
-          this.items.filter(cur => {
+          this.setItems.filter(cur => {
             if(cur.id === item.id){
               this.currentPrice = cur.price;
             }
@@ -258,7 +235,7 @@ export default {
     priceSort() {
       const comparePrice = (a, b) => (a.price - b.price);
 
-      return this.temp.sort(comparePrice);
+      return this.setItems.sort(comparePrice);
     },
     priceSortReverse() {
       return this.priceSort().reverse();
@@ -273,27 +250,18 @@ export default {
         return 0;
       }
 
-      return this.temp.sort(compareTitle);
+      return this.setItems.sort(compareTitle);
     },
     titleSortReverse() {
       return this.titleSort().reverse();
     },
     clearSort() {
       this.search = '';
-      this.temp = this.items;
-    },
-    nextPage() {
-      this.page++;
-    },
-    prevPage() {
-      this.page--;
     },
     deleteItem(itemId) {
-      /*const index = this.basket.findIndex(item => item.id === itemId);
-      this.basket.splice(index, 1);*/
       this.basket = this.basket.filter(item => item.id !== itemId);
     },
-    /*buy() {
+    /*order() {
       this.loadingC = true;
       fetch("example/com", {
         headers: {
@@ -308,24 +276,18 @@ export default {
     }*/
   },
   computed: {
+    ...mapState({
+      setItems: state => state.items,
+      loading: state => state.loading,
+      stats: state => state.stats,
+      loadingS: state => state.loadingS
+    }),
     filteredItems() {
-      return this.temp.filter(item => {
+      this.temp = this.setItems;
+      return this.setItems.filter(item => {
         return item.name.indexOf(this.search) > -1
       })
     }
-    /*pageCount() {
-      let l = this.items.length;
-      let s = this.size;
-
-      return Math.ceil(l/s)
-    },
-    paginatedData() {
-      let start = this.page * this.size;
-      let end = start + this.size;
-      //this.temp = this.items;
-
-      return this.temp.slice(start, end)
-    }*/
   }
 };
 </script>
