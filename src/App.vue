@@ -1,12 +1,15 @@
 <template>
   <div id="app" class="container">
+
     <h1 class="text-center display-4 my-5">Super Shop</h1>
     <hr>
+
     <div class="row">
       <div class="col-7">
+
         <div class="row">
+          <!-- filter block -->
           <div class="col-5 shadow p-3 mb-5 bg-white rounded">
-            <!-- filter block -->
             <div class="form-group">
                 <label for="search">
                   <h4><span class="badge badge-secondary badge-pill">Search</span></h4>
@@ -46,6 +49,8 @@
               </div>
             </div>
           </div>
+
+          <!-- items block -->
           <div class="col ml-5 shadow p-3 mb-5 bg-white rounded">
             <h4><span class="badge badge-secondary badge-pill">
               Items
@@ -58,14 +63,14 @@
                 <span class="sr-only">Loading...</span>
               </div>
             </div>
-            <!-- items block -->
             <ul class="list-group">
               <li class="list-group-item list-group-item-action text-left" v-for="item of filteredItems"><span class="">{{ item.name }}</span><button v-on:click="addTo(item.id, item.name, item.price)" class="btn btn-outline-warning float-right">Add to cart {{ item.price }}</button></li>
             </ul>
           </div>
         </div>
+
+        <!-- stats block -->
         <div class="row">
-          <!-- stats block -->
           <div class="col">
             <h4><span class="badge badge-secondary badge-pill">
               Stats
@@ -84,8 +89,9 @@
           </div>
         </div>
       </div>
+
+      <!-- basket block -->
       <div class="col ml-5 shadow p-3 mb-5 bg-white rounded" style="height: 385px">
-        <!-- basket block -->
         <h4><span class="badge badge-secondary badge-pill">Cart</span></h4>
         <div v-if="!basket.length"><h2><p class="text-center mt-5">Haven't items yet</p></h2></div>
         <div v-else>
@@ -143,7 +149,7 @@
         </div>
         </div>
       </div>
-    </div>
+  </div>
 </template>
 
 <script>
@@ -262,7 +268,6 @@ export default {
       this.basket = this.basket.filter(item => item.id !== itemId);
     },
     /*order() {
-      this.loadingC = true;
       fetch("example/com", {
         headers: {
           "Accept": 'application/json',
@@ -271,7 +276,6 @@ export default {
         method: "POST",
         body: JSON.stringify(this.basket)
       })
-      .then(() => this.loadingC = false)
       .catch(e => alert("Error! Try again"))
     }*/
   },
@@ -283,7 +287,6 @@ export default {
       loadingS: state => state.loadingS
     }),
     filteredItems() {
-      this.temp = this.setItems;
       return this.setItems.filter(item => {
         return item.name.indexOf(this.search) > -1
       })
