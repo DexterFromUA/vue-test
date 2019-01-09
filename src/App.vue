@@ -80,10 +80,10 @@
             </span></h4>
             <div class="row">
               <div class="col">
-                <p>Total count of orders in the shop: {{ stats.totalItems }}</p>
+                <p>Total count of orders in the shop: {{ stats.totalOrders }}</p>
               </div>
               <div class="col">
-                <p>Total count of items in the shop: {{ temp.length }}</p>
+                <p>Total count of items in the shop: {{ setItems.length }}</p>
               </div>
             </div>
           </div>

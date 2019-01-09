@@ -12,7 +12,7 @@ export default new Vuex.Store({
   },
   actions: {
     getItems({ commit }) {
-      fetch("https://5c2e28432fffe80014bd68f5.mockapi.io/items")
+      fetch("https://testapi.io/api/DexterFromUA/items")
         .then(res => res.json())
         .then(data => {
           commit({
@@ -29,7 +29,7 @@ export default new Vuex.Store({
         );
     },
     getStats({ commit }) {
-      fetch("https://5c2f60112fffe80014bd6a37.mockapi.io/total/1")
+      fetch("https://testapi.io/api/DexterFromUA/stats")
         .then(res => res.json())
         .then(data => {
           commit({
