@@ -1,25 +1,24 @@
+import '@babel/polyfill'
 import Vue from "vue";
-import BootstrapVue from "bootstrap-vue";
+import './plugins/bootstrap-vue'
+import Vuebar from "vuebar";
 
 import App from "./App.vue";
 import store from "./store";
 
 Vue.config.productionTip = false;
-Vue.use(BootstrapVue);
-
-import "bootstrap/dist/css/bootstrap.css";
-import "bootstrap-vue/dist/bootstrap-vue.css";
+Vue.use(Vuebar);
 
 new Vue({
   store,
   render: h => h(App)
 }).$mount("#app");
 
-document.addEventListener('contextmenu', event => {
+document.addEventListener("contextmenu", event => {
   event.preventDefault();
   event.stopPropagation();
 });
 
-document.addEventListener('mousedown', e => {
+document.addEventListener("mousedown", e => {
   e.preventDefault();
-})
+});
